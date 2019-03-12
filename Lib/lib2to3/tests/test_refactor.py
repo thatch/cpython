@@ -37,7 +37,7 @@ class TestRefactoringTool(unittest.TestCase):
     def check_instances(self, instances, classes):
         for inst, cls in zip(instances, classes):
             if not isinstance(inst, cls):
-                self.fail("%s are not instances of %s" % instances, classes)
+                self.fail("%s are not instances of %s" % (instances, classes))
 
     def rt(self, options=None, fixers=_DEFAULT_FIXERS, explicit=None):
         return refactor.RefactoringTool(fixers, options, explicit)
@@ -55,7 +55,7 @@ class TestRefactoringTool(unittest.TestCase):
         self.assertTrue(rt.write_unchanged_files)
 
     def test_fixer_loading_helpers(self):
-        contents = ["explicit", "first", "last", "parrot", "preorder"]
+        contents = ["await", "explicit", "first", "last", "parrot", "preorder"]
         non_prefixed = refactor.get_all_fix_names("myfixes")
         prefixed = refactor.get_all_fix_names("myfixes", False)
         full_names = refactor.get_fixers_from_package("myfixes")
@@ -132,6 +132,7 @@ from __future__ import print_function"""
 
     def test_fixer_loading(self):
         from myfixes.fix_first import FixFirst
+        from myfixes.fix_await import FixAwait
         from myfixes.fix_last import FixLast
         from myfixes.fix_parrot import FixParrot
         from myfixes.fix_preorder import FixPreorder
@@ -140,7 +141,7 @@ from __future__ import print_function"""
         pre, post = rt.get_fixers()
 
         self.check_instances(pre, [FixPreorder])
-        self.check_instances(post, [FixFirst, FixParrot, FixLast])
+        self.check_instances(post, [FixFirst, FixAwait, FixParrot, FixLast])
 
     def test_naughty_fixers(self):
         self.assertRaises(ImportError, self.rt, fixers=["not_here"])
@@ -331,3 +332,9 @@ from __future__ import print_function"""
                 break
         else:
             self.fail("explicit fixer not loaded")
+
+    def test_refactor_await(self):
+        rt = self.rt()
+        input = "async def a(): await b()\n\n"
+        tree = rt.refactor_string(input, "<test>")
+        self.assertNotEqual(str(tree), input)

@@ -145,11 +145,16 @@ class PatternCompiler(object):
         elif node.type == token.NAME:
             value = node.value
             if value.isupper():
-                if value not in TOKEN_MAP:
-                    raise PatternSyntaxError("Invalid token: %r" % value)
+                # Map named tokens to the type value for a LeafPattern
+                if value == 'TOKEN':
+                    type = None
+                else:
+                    type = getattr(token, value)
+                    if not type:
+                        raise PatternSyntaxError("Invalid token: %r" % value)
                 if nodes[1:]:
                     raise PatternSyntaxError("Can't have details for token")
-                return pytree.LeafPattern(TOKEN_MAP[value])
+                return pytree.LeafPattern(type)
             else:
                 if value == "any":
                     type = None
@@ -175,14 +180,8 @@ class PatternCompiler(object):
         return int(node.value)
 
 
-# Map named tokens to the type value for a LeafPattern
-TOKEN_MAP = {"NAME": token.NAME,
-             "STRING": token.STRING,
-             "NUMBER": token.NUMBER,
-             "TOKEN": None}
-
-
 def _type_of_literal(value):
+    # Special case: you can't match ASYNC or AWAIT in their new keyword forms this way.
     if value[0].isalpha():
         return token.NAME
     elif value in grammar.opmap:
