@@ -79,7 +79,7 @@ def build_pattern(mapping=MAPPING):
           """ % (mod_list, mod_list)
 
     # Find usages of module members in code e.g. thread.foo(bar)
-    yield "power< bare_with_attr=(%s) trailer<'.' any > any* >" % bare_names
+    yield "atom_expr< bare_with_attr=(%s) trailer<'.' any > any* >" % bare_names
 
 
 class FixImports(fixer_base.BaseFix):

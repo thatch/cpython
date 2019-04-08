@@ -17,9 +17,9 @@ bind_warning = "Calls to builtin next() possibly shadowed by global binding"
 class FixNext(fixer_base.BaseFix):
     BM_compatible = True
     PATTERN = """
-    power< base=any+ trailer< '.' attr='next' > trailer< '(' ')' > >
+    atom_expr< base=any+ trailer< '.' attr='next' > trailer< '(' ')' > >
     |
-    power< head=any+ trailer< '.' attr='next' > not trailer< '(' ')' > >
+    atom_expr< head=any+ trailer< '.' attr='next' > not trailer< '(' ')' > >
     |
     classdef< 'class' any+ ':'
               suite< any*

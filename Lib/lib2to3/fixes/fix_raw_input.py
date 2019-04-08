@@ -9,7 +9,7 @@ class FixRawInput(fixer_base.BaseFix):
 
     BM_compatible = True
     PATTERN = """
-              power< name='raw_input' trailer< '(' [any] ')' > any* >
+              atom_expr< name='raw_input' trailer< '(' [any] ')' > any* >
               """
 
     def transform(self, node, results):

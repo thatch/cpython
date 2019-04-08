@@ -39,7 +39,7 @@ class FixHasKey(fixer_base.BaseFix):
     BM_compatible = True
 
     PATTERN = """
-    anchor=power<
+    anchor=atom_expr<
         before=any+
         trailer< '.' 'has_key' >
         trailer<
@@ -54,7 +54,7 @@ class FixHasKey(fixer_base.BaseFix):
     |
     negation=not_test<
         'not'
-        anchor=power<
+        anchor=atom_expr<
             before=any+
             trailer< '.' 'has_key' >
             trailer<
@@ -90,7 +90,7 @@ class FixHasKey(fixer_base.BaseFix):
         if len(before) == 1:
             before = before[0]
         else:
-            before = pytree.Node(syms.power, before)
+            before = pytree.Node(syms.atom_expr, before)
         before.prefix = " "
         n_op = Name("in", prefix=" ")
         if negation:
@@ -99,7 +99,7 @@ class FixHasKey(fixer_base.BaseFix):
         new = pytree.Node(syms.comparison, (arg, n_op, before))
         if after:
             new = parenthesize(new)
-            new = pytree.Node(syms.power, (new,) + tuple(after))
+            new = pytree.Node(syms.atom_expr, (new,) + tuple(after))
         if node.parent.type in (syms.comparison, syms.expr, syms.xor_expr,
                                 syms.and_expr, syms.shift_expr,
                                 syms.arith_expr, syms.term,

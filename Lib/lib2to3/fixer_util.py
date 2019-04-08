@@ -58,7 +58,7 @@ def ArgList(args, lparen=LParen(), rparen=RParen()):
 
 def Call(func_name, args=None, prefix=None):
     """A function call"""
-    node = Node(syms.power, [func_name, ArgList(args)])
+    node = Node(syms.atom_expr, [func_name, ArgList(args)])
     if prefix is not None:
         node.prefix = prefix
     return node
@@ -102,7 +102,7 @@ def ListComp(xp, fp, it, test=None):
         if_leaf = Leaf(token.NAME, "if")
         if_leaf.prefix = " "
         inner_args.append(Node(syms.comp_if, [if_leaf, test]))
-    inner = Node(syms.listmaker, [xp, Node(syms.comp_for, inner_args)])
+    inner = Node(syms.testlist_comp, [xp, Node(syms.comp_for, inner_args)])
     return Node(syms.atom,
                        [Leaf(token.LBRACE, "["),
                         inner,
@@ -141,7 +141,7 @@ def ImportAndCall(node, results, names):
     after = results["after"]
     if after:
         after = [n.clone() for n in after]
-    new = Node(syms.power,
+    new = Node(syms.atom_expr,
                Attr(Name(names[0]), Name(names[1])) +
                [Node(syms.trailer,
                      [results["lpar"].clone(),
@@ -208,10 +208,10 @@ def attr_chain(obj, attr):
         next = getattr(next, attr)
 
 p0 = """for_stmt< 'for' any 'in' node=any ':' any* >
-        | comp_for< 'for' any 'in' node=any any* >
+        | sync_comp_for< 'for' any 'in' node=any any* >
      """
 p1 = """
-power<
+atom_expr<
     ( 'iter' | 'list' | 'tuple' | 'sorted' | 'set' | 'sum' |
       'any' | 'all' | 'enumerate' | (any* trailer< '.' 'join' >) )
     trailer< '(' node=any ')' >
@@ -219,7 +219,7 @@ power<
 >
 """
 p2 = """
-power<
+atom_expr<
     ( 'sorted' | 'enumerate' )
     trailer< '(' arglist<node=any any*> ')' >
     any*
@@ -271,7 +271,7 @@ def is_probably_builtin(node):
 def find_indentation(node):
     """Find the indentation of *node*."""
     while node is not None:
-        if node.type == syms.suite and len(node.children) > 2:
+        if node.type in (syms.suite, syms.func_body_suite) and len(node.children) > 2:
             indent = node.children[1]
             if indent.type == token.INDENT:
                 return indent.value

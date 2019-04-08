@@ -15,7 +15,7 @@ class FixApply(fixer_base.BaseFix):
     BM_compatible = True
 
     PATTERN = """
-    power< 'apply'
+    atom_expr< 'apply'
         trailer<
             '('
             arglist<
@@ -37,10 +37,8 @@ class FixApply(fixer_base.BaseFix):
         # I feel like we should be able to express this logic in the
         # PATTERN above but I don't know how to do it so...
         if args:
-            if args.type == self.syms.star_expr:
-                return  # Make no change.
             if (args.type == self.syms.argument and
-                args.children[0].value == '**'):
+                args.children[0].value in ('*', '**')):
                 return  # Make no change.
         if kwds and (kwds.type == self.syms.argument and
                      kwds.children[0].value == '**'):
@@ -48,8 +46,9 @@ class FixApply(fixer_base.BaseFix):
         prefix = node.prefix
         func = func.clone()
         if (func.type not in (token.NAME, syms.atom) and
-            (func.type != syms.power or
-             func.children[-2].type == token.DOUBLESTAR)):
+            (func.type != syms.atom_expr or
+             (func.children[-2].type == self.syms.argument and
+              func.children[-2].children[0] in ('*', '**')))):
             # Need to parenthesize
             func = parenthesize(func)
         func.prefix = ""
@@ -66,5 +65,5 @@ class FixApply(fixer_base.BaseFix):
             l_newargs[-2].prefix = " " # that's the ** token
         # XXX Sometimes we could be cleverer, e.g. apply(f, (x, y) + t)
         # can be translated into f(x, y, *t) instead of f(*(x, y) + t)
-        #new = pytree.Node(syms.power, (func, ArgList(l_newargs)))
+        #new = pytree.Node(syms.atom_expr, (func, ArgList(l_newargs)))
         return Call(func, l_newargs, prefix=prefix)

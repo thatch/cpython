@@ -22,7 +22,7 @@ class FixExitfunc(fixer_base.BaseFix):
                   >
               |
                   expr_stmt<
-                      power< 'sys' trailer< '.' 'exitfunc' > >
+                      atom_expr< 'sys' trailer< '.' 'exitfunc' > >
                   '=' func=any >
               )
               """
@@ -43,7 +43,7 @@ class FixExitfunc(fixer_base.BaseFix):
 
         func = results["func"].clone()
         func.prefix = ""
-        register = pytree.Node(syms.power,
+        register = pytree.Node(syms.atom_expr,
                                Attr(Name("atexit"), Name("register"))
                                )
         call = Call(register, [func], node.prefix)

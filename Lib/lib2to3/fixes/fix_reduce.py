@@ -18,7 +18,7 @@ class FixReduce(fixer_base.BaseFix):
     order = "pre"
 
     PATTERN = """
-    power< 'reduce'
+    atom_expr< 'reduce'
         trailer< '('
             arglist< (
                 (not(argument<any '=' any>) any ','

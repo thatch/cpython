@@ -16,10 +16,10 @@ from ..fixer_util import token
 class FixIsinstance(fixer_base.BaseFix):
     BM_compatible = True
     PATTERN = """
-    power<
+    atom_expr<
         'isinstance'
         trailer< '(' arglist< any ',' atom< '('
-            args=testlist_gexp< any+ >
+            args=testlist_comp< any+ >
         ')' > > ')' >
     >
     """

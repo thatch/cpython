@@ -18,7 +18,7 @@ class FixZip(fixer_base.ConditionalFix):
 
     BM_compatible = True
     PATTERN = """
-    power< 'zip' args=trailer< '(' [any] ')' > [trailers=trailer*]
+    atom_expr< 'zip' args=trailer< '(' [any] ')' > [trailers=trailer*]
     >
     """
 
@@ -40,7 +40,7 @@ class FixZip(fixer_base.ConditionalFix):
             for n in trailers:
                 n.prefix = ""
 
-        new = Node(syms.power, [Name("zip"), args], prefix="")
-        new = Node(syms.power, [Name("list"), ArgList([new])] + trailers)
+        new = Node(syms.atom_expr, [Name("zip"), args], prefix="")
+        new = Node(syms.atom_expr, [Name("list"), ArgList([new])] + trailers)
         new.prefix = node.prefix
         return new

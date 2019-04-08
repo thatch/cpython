@@ -34,7 +34,7 @@ def build_pattern():
                       ( attr_name=%r | import_as_name< attr_name=%r 'as' any >) >
                   """ % (module, old_attr, old_attr)
             yield """
-                  power< module_name=%r trailer< '.' attr_name=%r > any* >
+                  atom_expr< module_name=%r trailer< '.' attr_name=%r > any* >
                   """ % (module, old_attr)
     #yield """bare_name=%s""" % alternates(bare)
 

@@ -31,13 +31,13 @@ class FixMap(fixer_base.ConditionalFix):
     BM_compatible = True
 
     PATTERN = """
-    map_none=power<
+    map_none=atom_expr<
         'map'
         trailer< '(' arglist< 'None' ',' arg=any [','] > ')' >
         [extra_trailers=trailer*]
     >
     |
-    map_lambda=power<
+    map_lambda=atom_expr<
         'map'
         trailer<
             '('
@@ -53,7 +53,7 @@ class FixMap(fixer_base.ConditionalFix):
         [extra_trailers=trailer*]
     >
     |
-    power<
+    atom_expr<
         'map' args=trailer< '(' [any] ')' >
         [extra_trailers=trailer*]
     >
@@ -79,7 +79,7 @@ class FixMap(fixer_base.ConditionalFix):
             new = ListComp(results["xp"].clone(),
                            results["fp"].clone(),
                            results["it"].clone())
-            new = Node(syms.power, [new] + trailers, prefix="")
+            new = Node(syms.atom_expr, [new] + trailers, prefix="")
 
         else:
             if "map_none" in results:
@@ -97,13 +97,13 @@ class FixMap(fixer_base.ConditionalFix):
                                      "now truncates to the shortest sequence")
                         return
 
-                    new = Node(syms.power, [Name("map"), args.clone()])
+                    new = Node(syms.atom_expr, [Name("map"), args.clone()])
                     new.prefix = ""
 
                 if in_special_context(node):
                     return None
 
-            new = Node(syms.power, [Name("list"), ArgList([new])] + trailers)
+            new = Node(syms.atom_expr, [Name("list"), ArgList([new])] + trailers)
             new.prefix = ""
 
         new.prefix = node.prefix

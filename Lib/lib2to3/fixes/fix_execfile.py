@@ -16,9 +16,9 @@ class FixExecfile(fixer_base.BaseFix):
     BM_compatible = True
 
     PATTERN = """
-    power< 'execfile' trailer< '(' arglist< filename=any [',' globals=any [',' locals=any ] ] > ')' > >
+    atom_expr< 'execfile' trailer< '(' arglist< filename=any [',' globals=any [',' locals=any ] ] > ')' > >
     |
-    power< 'execfile' trailer< '(' filename=any ')' > >
+    atom_expr< 'execfile' trailer< '(' filename=any ')' > >
     """
 
     def transform(self, node, results):
@@ -33,7 +33,7 @@ class FixExecfile(fixer_base.BaseFix):
         # Construct open().read().
         open_args = ArgList([filename.clone(), Comma(), String('"rb"', ' ')],
                             rparen=execfile_paren)
-        open_call = Node(syms.power, [Name("open"), open_args])
+        open_call = Node(syms.atom_expr, [Name("open"), open_args])
         read = [Node(syms.trailer, [Dot(), Name('read')]),
                 Node(syms.trailer, [LParen(), RParen()])]
         open_expr = [open_call] + read

@@ -16,7 +16,7 @@ class FixSysExc(fixer_base.BaseFix):
     exc_info = ["exc_type", "exc_value", "exc_traceback"]
     BM_compatible = True
     PATTERN = """
-              power< 'sys' trailer< dot='.' attribute=(%s) > >
+              atom_expr< 'sys' trailer< dot='.' attribute=(%s) > >
               """ % '|'.join("'%s'" % e for e in exc_info)
 
     def transform(self, node, results):
@@ -27,4 +27,4 @@ class FixSysExc(fixer_base.BaseFix):
         attr = Attr(Name("sys"), call)
         attr[1].children[0].prefix = results["dot"].prefix
         attr.append(Subscript(index))
-        return Node(syms.power, attr, prefix=node.prefix)
+        return Node(syms.atom_expr, attr, prefix=node.prefix)

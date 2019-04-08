@@ -26,6 +26,7 @@ from .fixer_util import find_root
 from . import pytree, pygram
 from . import btm_matcher as bm
 
+NUM = 1
 
 def get_all_fix_names(fixer_pkg, remove_prefix=True):
     """Return a sorted list of all available fix names in the given package."""
@@ -357,6 +358,10 @@ class RefactoringTool(object):
         try:
             tree = self.driver.parse_string(data)
         except Exception as err:
+            global NUM
+            with open(f"bad{NUM}.py", "w") as f:
+                f.write(data)
+            NUM += 1
             self.log_error("Can't parse %s: %s: %s",
                            name, err.__class__.__name__, err)
             return

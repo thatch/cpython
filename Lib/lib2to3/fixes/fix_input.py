@@ -7,13 +7,13 @@ from ..fixer_util import Call, Name
 from .. import patcomp
 
 
-context = patcomp.compile_pattern("power< 'eval' trailer< '(' any ')' > >")
+context = patcomp.compile_pattern("atom_expr< 'eval' trailer< '(' any ')' > >")
 
 
 class FixInput(fixer_base.BaseFix):
     BM_compatible = True
     PATTERN = """
-              power< 'input' args=trailer< '(' [any] ')' > >
+              atom_expr< 'input' args=trailer< '(' [any] ')' > >
               """
 
     def transform(self, node, results):

@@ -64,7 +64,7 @@ def build_pattern():
                                   dotted_as_name< module_as=%r 'as' any > >
                   """ % old_module
             # bare_with_attr has a special significance for FixImports.match().
-            yield """power< bare_with_attr=%r trailer< '.' member=%s > any* >
+            yield """atom_expr< bare_with_attr=%r trailer< '.' member=%s > any* >
                   """ % (old_module, members)
 
 

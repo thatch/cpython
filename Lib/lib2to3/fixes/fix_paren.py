@@ -14,8 +14,8 @@ class FixParen(fixer_base.BaseFix):
 
     PATTERN = """
         atom< ('[' | '(')
-            (listmaker< any
-                comp_for<
+            (testlist_comp< any
+                sync_comp_for<
                     'for' NAME 'in'
                     target=testlist_safe< any (',' any)+ [',']
                      >
@@ -23,8 +23,8 @@ class FixParen(fixer_base.BaseFix):
                 >
             >
             |
-            testlist_gexp< any
-                comp_for<
+            testlist_comp< any
+                sync_comp_for<
                     'for' NAME 'in'
                     target=testlist_safe< any (',' any)+ [',']
                      >

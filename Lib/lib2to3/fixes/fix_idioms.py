@@ -32,7 +32,7 @@ from .. import fixer_base
 from ..fixer_util import Call, Comma, Name, Node, BlankLine, syms
 
 CMP = "(n='!=' | '==' | 'is' | n=comp_op< 'is' 'not' >)"
-TYPE = "power< 'type' trailer< '(' x=any ')' > >"
+TYPE = "atom_expr< 'type' trailer< '(' x=any ')' > >"
 
 class FixIdioms(fixer_base.BaseFix):
     explicit = True # The user must ask for this fixer
@@ -48,13 +48,13 @@ class FixIdioms(fixer_base.BaseFix):
             any*
             simple_stmt<
               expr_stmt< id1=any '='
-                         power< list='list' trailer< '(' (not arglist<any+>) any ')' > >
+                         atom_expr< list='list' trailer< '(' (not arglist<any+>) any ')' > >
               >
               '\n'
             >
             sort=
             simple_stmt<
-              power< id2=any
+              atom_expr< id2=any
                      trailer< '.' 'sort' > trailer< '(' ')' >
               >
               '\n'
@@ -67,7 +67,7 @@ class FixIdioms(fixer_base.BaseFix):
             simple_stmt< expr_stmt< id1=any '=' expr=any > '\n' >
             sort=
             simple_stmt<
-              power< id2=any
+              atom_expr< id2=any
                      trailer< '.' 'sort' > trailer< '(' ')' >
               >
               '\n'

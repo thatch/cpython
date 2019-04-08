@@ -11,9 +11,9 @@ from ..fixer_util import Name
 class FixXreadlines(fixer_base.BaseFix):
     BM_compatible = True
     PATTERN = """
-    power< call=any+ trailer< '.' 'xreadlines' > trailer< '(' ')' > >
+    atom_expr< call=any+ trailer< '.' 'xreadlines' > trailer< '(' ')' > >
     |
-    power< any+ trailer< '.' no_call='xreadlines' > >
+    atom_expr< any+ trailer< '.' no_call='xreadlines' > >
     """
 
     def transform(self, node, results):

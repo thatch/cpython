@@ -24,7 +24,7 @@ class FixFilter(fixer_base.ConditionalFix):
     BM_compatible = True
 
     PATTERN = """
-    filter_lambda=power<
+    filter_lambda=atom_expr<
         'filter'
         trailer<
             '('
@@ -40,13 +40,13 @@ class FixFilter(fixer_base.ConditionalFix):
         [extra_trailers=trailer*]
     >
     |
-    power<
+    atom_expr<
         'filter'
         trailer< '(' arglist< none='None' ',' seq=any > ')' >
         [extra_trailers=trailer*]
     >
     |
-    power<
+    atom_expr<
         'filter'
         args=trailer< '(' [any] ')' >
         [extra_trailers=trailer*]
@@ -69,22 +69,22 @@ class FixFilter(fixer_base.ConditionalFix):
                            results.get("fp").clone(),
                            results.get("it").clone(),
                            results.get("xp").clone())
-            new = Node(syms.power, [new] + trailers, prefix="")
+            new = Node(syms.atom_expr, [new] + trailers, prefix="")
 
         elif "none" in results:
             new = ListComp(Name("_f"),
                            Name("_f"),
                            results["seq"].clone(),
                            Name("_f"))
-            new = Node(syms.power, [new] + trailers, prefix="")
+            new = Node(syms.atom_expr, [new] + trailers, prefix="")
 
         else:
             if in_special_context(node):
                 return None
 
             args = results['args'].clone()
-            new = Node(syms.power, [Name("filter"), args], prefix="")
-            new = Node(syms.power, [Name("list"), ArgList([new])] + trailers)
+            new = Node(syms.atom_expr, [Name("filter"), args], prefix="")
+            new = Node(syms.atom_expr, [Name("list"), ArgList([new])] + trailers)
             new.prefix = ""
         new.prefix = node.prefix
         return new

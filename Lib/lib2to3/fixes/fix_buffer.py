@@ -14,7 +14,7 @@ class FixBuffer(fixer_base.BaseFix):
     explicit = True # The user must ask for this fixer
 
     PATTERN = """
-              power< name='buffer' trailer< '(' [any] ')' > any* >
+              atom_expr< name='buffer' trailer< '(' [any] ')' > any* >
               """
 
     def transform(self, node, results):

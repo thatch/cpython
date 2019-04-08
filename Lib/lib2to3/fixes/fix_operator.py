@@ -34,10 +34,10 @@ class FixOperator(fixer_base.BaseFix):
               """
     obj = "'(' obj=any ')'"
     PATTERN = """
-              power< module='operator'
+              atom_expr< module='operator'
                 trailer< '.' %(methods)s > trailer< %(obj)s > >
               |
-              power< %(methods)s trailer< %(obj)s > >
+              atom_expr< %(methods)s trailer< %(obj)s > >
               """ % dict(methods=methods, obj=obj)
 
     def transform(self, node, results):

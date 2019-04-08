@@ -128,7 +128,7 @@ class FixTupleParams(fixer_base.BaseFix):
         for n in body.post_order():
             if n.type == token.NAME and n.value in to_index:
                 subscripts = [c.clone() for c in to_index[n.value]]
-                new = pytree.Node(syms.power,
+                new = pytree.Node(syms.atom_expr,
                                   [new_param.clone()] + subscripts)
                 new.prefix = n.prefix
                 n.replace(new)

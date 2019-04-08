@@ -16,11 +16,11 @@ from ..fixer_util import Name, Call, ArgList, Attr, is_tuple
 class FixThrow(fixer_base.BaseFix):
     BM_compatible = True
     PATTERN = """
-    power< any trailer< '.' 'throw' >
+    atom_expr< any trailer< '.' 'throw' >
            trailer< '(' args=arglist< exc=any ',' val=any [',' tb=any] > ')' >
     >
     |
-    power< any trailer< '.' 'throw' > trailer< '(' exc=any ')' > >
+    atom_expr< any trailer< '.' 'throw' > trailer< '(' exc=any ')' > >
     """
 
     def transform(self, node, results):
@@ -51,6 +51,6 @@ class FixThrow(fixer_base.BaseFix):
 
             e = Call(exc, args)
             with_tb = Attr(e, Name('with_traceback')) + [ArgList([tb])]
-            throw_args.replace(pytree.Node(syms.power, with_tb))
+            throw_args.replace(pytree.Node(syms.atom_expr, with_tb))
         else:
             throw_args.replace(Call(exc, args))

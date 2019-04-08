@@ -11,7 +11,7 @@ class FixGetcwdu(fixer_base.BaseFix):
     BM_compatible = True
 
     PATTERN = """
-              power< 'os' trailer< dot='.' name='getcwdu' > any* >
+              atom_expr< 'os' trailer< dot='.' name='getcwdu' > any* >
               """
 
     def transform(self, node, results):

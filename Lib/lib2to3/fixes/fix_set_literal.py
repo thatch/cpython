@@ -14,12 +14,12 @@ class FixSetLiteral(fixer_base.BaseFix):
     BM_compatible = True
     explicit = True
 
-    PATTERN = """power< 'set' trailer< '('
-                     (atom=atom< '[' (items=listmaker< any ((',' any)* [',']) >
+    PATTERN = """atom_expr< 'set' trailer< '('
+                     (atom=atom< '[' (items=testlist_comp< any ((',' any)* [',']) >
                                 |
                                 single=any) ']' >
                      |
-                     atom< '(' items=testlist_gexp< any ((',' any)* [',']) > ')' >
+                     atom< '(' items=testlist_comp< any ((',' any)* [',']) > ')' >
                      )
                      ')' > >
               """
@@ -27,8 +27,8 @@ class FixSetLiteral(fixer_base.BaseFix):
     def transform(self, node, results):
         single = results.get("single")
         if single:
-            # Make a fake listmaker
-            fake = pytree.Node(syms.listmaker, [single.clone()])
+            # Make a fake testlist_comp
+            fake = pytree.Node(syms.testlist_comp, [single.clone()])
             single.replace(fake)
             items = fake
         else:
@@ -40,7 +40,7 @@ class FixSetLiteral(fixer_base.BaseFix):
         literal.append(pytree.Leaf(token.RBRACE, "}"))
         # Set the prefix of the right brace to that of the ')' or ']'
         literal[-1].prefix = items.next_sibling.prefix
-        maker = pytree.Node(syms.dictsetmaker, literal)
+        maker = pytree.Node(syms.dictorsetmaker, literal)
         maker.prefix = node.prefix
 
         # If the original was a one tuple, we need to remove the extra comma.

@@ -15,7 +15,7 @@ class FixIntern(fixer_base.BaseFix):
     order = "pre"
 
     PATTERN = """
-    power< 'intern'
+    atom_expr< 'intern'
            trailer< lpar='('
                     ( not(arglist | argument<any '=' any>) obj=any
                       | obj=arglist<(not argument<any '=' any>) any ','> )
@@ -33,7 +33,7 @@ class FixIntern(fixer_base.BaseFix):
                 if obj.type == self.syms.star_expr:
                     return  # Make no change.
                 if (obj.type == self.syms.argument and
-                    obj.children[0].value == '**'):
+                    obj.children[0].value in ('*', '**')):
                     return  # Make no change.
         names = ('sys', 'intern')
         new = ImportAndCall(node, results, names)

@@ -42,7 +42,7 @@ class FixDict(fixer_base.BaseFix):
     BM_compatible = True
 
     PATTERN = """
-    power< head=any+
+    atom_expr< head=any+
          trailer< '.' method=('keys'|'items'|'values'|
                               'iterkeys'|'iteritems'|'itervalues'|
                               'viewkeys'|'viewitems'|'viewvalues') >
@@ -70,20 +70,20 @@ class FixDict(fixer_base.BaseFix):
                                     Name(method_name,
                                          prefix=method.prefix)]),
                        results["parens"].clone()]
-        new = pytree.Node(syms.power, args)
+        new = pytree.Node(syms.atom_expr, args)
         if not (special or isview):
             new.prefix = ""
             new = Call(Name("iter" if isiter else "list"), [new])
         if tail:
-            new = pytree.Node(syms.power, [new] + tail)
+            new = pytree.Node(syms.atom_expr, [new] + tail)
         new.prefix = node.prefix
         return new
 
-    P1 = "power< func=NAME trailer< '(' node=any ')' > any* >"
+    P1 = "atom_expr< func=NAME trailer< '(' node=any ')' > any* >"
     p1 = patcomp.compile_pattern(P1)
 
     P2 = """for_stmt< 'for' any 'in' node=any ':' any* >
-            | comp_for< 'for' any 'in' node=any any* >
+            | sync_comp_for< 'for' any 'in' node=any any* >
          """
     p2 = patcomp.compile_pattern(P2)
 

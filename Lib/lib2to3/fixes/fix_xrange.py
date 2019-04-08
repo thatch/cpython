@@ -12,7 +12,7 @@ from .. import patcomp
 class FixXrange(fixer_base.BaseFix):
     BM_compatible = True
     PATTERN = """
-              power<
+              atom_expr<
                  (name='range'|name='xrange') trailer< '(' args=any ')' >
               rest=any* >
               """
@@ -51,11 +51,11 @@ class FixXrange(fixer_base.BaseFix):
                 list_call.append_child(n)
             return list_call
 
-    P1 = "power< func=NAME trailer< '(' node=any ')' > any* >"
+    P1 = "atom_expr< func=NAME trailer< '(' node=any ')' > any* >"
     p1 = patcomp.compile_pattern(P1)
 
     P2 = """for_stmt< 'for' any 'in' node=any ':' any* >
-            | comp_for< 'for' any 'in' node=any any* >
+            | sync_comp_for< 'for' any 'in' node=any any* >
             | comparison< any 'in' node=any any*>
          """
     p2 = patcomp.compile_pattern(P2)
