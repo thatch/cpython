@@ -1250,9 +1250,10 @@ class ZipExtFile(io.BufferedIOBase):
 
 
 class _ZipWriteFile(io.BufferedIOBase):
-    def __init__(self, zf, zinfo, zip64):
+    def __init__(self, zf, zinfo, zip64, streaming):
         self._zinfo = zinfo
         self._zip64 = zip64
+        self._intermediate_fp = None
         self._zipfile = zf
         self._compressor = _get_compressor(zinfo.compress_type,
                                            zinfo.compress_level)
@@ -1260,9 +1261,12 @@ class _ZipWriteFile(io.BufferedIOBase):
         self._compress_size = 0
         self._crc = 0
 
+        if not streaming:
+            self._intermediate_fp = io.BytesIO()
+
     @property
     def _fileobj(self):
-        return self._zipfile.fp
+        return self._intermediate_fp or self._zipfile.fp
 
     @property
     def name(self):
@@ -1323,6 +1327,11 @@ class _ZipWriteFile(io.BufferedIOBase):
                 self._fileobj.write(struct.pack(fmt, _DD_SIGNATURE, self._zinfo.CRC,
                     self._zinfo.compress_size, self._zinfo.file_size))
                 self._zipfile.start_dir = self._fileobj.tell()
+            elif self._intermediate_fp:
+                assert self._zinfo.header_offset == self._zipfile.fp.tell()
+                self._zipfile.fp.write(self._zinfo.FileHeader(self._zip64))
+                self._zipfile.fp.write(self._intermediate_fp.getvalue())
+                self._zipfile.start_dir = self._zipfile.fp.tell()
             else:
                 # Seek backwards and write file header (which will now include
                 # correct CRC and file sizes)
@@ -1424,6 +1433,7 @@ class ZipFile:
         self._fileRefCnt = 1
         self._lock = threading.RLock()
         self._seekable = True
+        self._force_non_seekable_data_descriptor = False
         self._writing = False
         self._data_offset = None
 
@@ -1772,7 +1782,7 @@ class ZipFile:
             zef_file.close()
             raise
 
-    def _open_to_write(self, zinfo, force_zip64=False):
+    def _open_to_write(self, zinfo, force_zip64=False, streaming=True):
         if force_zip64 and not self._allowZip64:
             raise ValueError(
                 "force_zip64 is True, but allowZip64 was False when opening "
@@ -1791,8 +1801,6 @@ class ZipFile:
         if zinfo.compress_type == ZIP_LZMA:
             # Compressed data includes an end-of-stream (EOS) marker
             zinfo.flag_bits |= _MASK_COMPRESS_OPTION_1
-        if not self._seekable:
-            zinfo.flag_bits |= _MASK_USE_DATA_DESCRIPTOR
 
         if not zinfo.external_attr:
             zinfo.external_attr = 0o600 << 16  # permissions: ?rw-------
@@ -1802,17 +1810,23 @@ class ZipFile:
         if not self._allowZip64 and zip64:
             raise LargeZipFile("Filesize would require ZIP64 extensions")
 
+        streaming = False
         if self._seekable:
             self.fp.seek(self.start_dir)
+            streaming = True
+        elif self._force_non_seekable_data_descriptor:
+            zinfo.flag_bits |= _MASK_USE_DATA_DESCRIPTOR
+            streaming = True
         zinfo.header_offset = self.fp.tell()
 
         self._writecheck(zinfo)
         self._didModify = True
 
-        self.fp.write(zinfo.FileHeader(zip64))
+        if streaming:
+            self.fp.write(zinfo.FileHeader(zip64))
 
         self._writing = True
-        return _ZipWriteFile(self, zinfo, zip64)
+        return _ZipWriteFile(self, zinfo, zip64, streaming)
 
     def extract(self, member, path=None, pwd=None):
         """Extract a member from the archive to the current working directory,

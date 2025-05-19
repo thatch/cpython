@@ -1211,6 +1211,7 @@ class StoredTestZip64InSmallFiles(AbstractTestZip64InSmallFiles,
 
         def make_zip(fp):
             with zipfile.ZipFile(fp, mode="w", allowZip64=True) as zf:
+                zf._force_non_seekable_data_descriptor = True
                 # pretend zipfile.ZipInfo.from_file was used to get the name and filesize
                 info = zipfile.ZipInfo("text.txt")
                 info.file_size = file_size
@@ -2971,6 +2972,7 @@ class UnseekableTests(unittest.TestCase):
                     zipfp.writestr('twos', b'222')
                 self.assertEqual(f.getvalue()[:5], b'abcPK')
                 with zipfile.ZipFile(f, mode='r') as zipf:
+                    self.assertEqual(zipf.getinfo("ones").flag_bits & zipfile._MASK_USE_DATA_DESCRIPTOR, 0)
                     with zipf.open('ones') as zopen:
                         self.assertEqual(zopen.read(), b'111')
                     with zipf.open('twos') as zopen:
